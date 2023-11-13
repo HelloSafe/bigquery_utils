@@ -3,7 +3,7 @@ from .enums import EVENT_PARAM_TYPES
 
 
 def unnest_event_params(
-    bq_table_path: str, event_param_key: str, event_param_type: str
+    bq_table_path: str, event_param_key: str, event_param_type: str, event_name: Optional[str]=None
 ) -> str: 
 
     if event_param_type not in EVENT_PARAM_TYPES:
@@ -21,6 +21,9 @@ def unnest_event_params(
     WHERE
         ep.key = '{event_param_key}'
     '''
+
+    if event_name is not None:
+        unnested += f"AND event_name = '{event_name}'"
 
     return unnested
 
