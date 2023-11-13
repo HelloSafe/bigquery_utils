@@ -3,7 +3,9 @@ from .session import create_client
 from .utils import (
     get_dataset_ids, 
     get_table_ids,
-    query_to_pandas
+    get_table_path,
+    query_to_pandas,
+    get_last_timestamp,
 )
 
 __all__ = [
@@ -13,6 +15,8 @@ __all__ = [
     'create_client', 
     'get_dataset_ids', 
     'get_table_ids', 
+    'get_table_path',
     'query_to_pandas',
+    'get_last_timestamp',
     'queries', 
 ]
