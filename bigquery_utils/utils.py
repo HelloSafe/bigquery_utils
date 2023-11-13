@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+
 from google.cloud import bigquery
 import pandas as pd
 
@@ -24,9 +25,11 @@ def get_table_path(dataset_id: str, table_id: str) -> str:
 
     return f'{PROJECT}.{dataset_id}.{table_id}'
 
-def query_to_pandas(client: bigquery.Client, query: str) -> pd.DataFrame: 
+def query_to_pandas(
+    client: bigquery.Client, query: str, progress_bar_type: Optional[str]=None
+) -> pd.DataFrame: 
 
-    df = client.query(query).result().to_dataframe(progress_bar_type='tqdm')
+    df = client.query(query).result().to_dataframe(progress_bar_type=progress_bar_type)
     
     return df
 
