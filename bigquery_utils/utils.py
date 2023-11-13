@@ -1,6 +1,7 @@
 from typing import List
 from google.cloud import bigquery
 import pandas as pd
+
 from .enums import PROJECT
 
 
@@ -26,7 +27,19 @@ def get_table_path(dataset_id: str, table_id: str) -> str:
 def query_to_pandas(client: bigquery.Client, query: str) -> pd.DataFrame: 
 
     df = client.query(query).result().to_dataframe(progress_bar_type='tqdm')
+    
     return df
 
+def get_last_timestamp(client: bigquery.Client, table_path: str, timestamp_field: str) -> int:
+
+    query = f'''
+    SELECT MAX({timestamp_field}) AS last_timestamp
+    FROM `{table_path}`
+    '''
+
+    result = query_to_pandas(client, query)
+    last_timestamp = result.last_timestamp.values[0]
+
+    return last_timestamp
 
 
