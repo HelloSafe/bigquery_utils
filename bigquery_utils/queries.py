@@ -3,11 +3,38 @@ from .enums import EVENT_PARAM_TYPES
 
 
 def unnest_event_params(
-    bq_table_path: str, event_param_key: str, event_param_type: str, event_name: Optional[str]=None
+    bq_table_path: str, 
+    param_keys: List[str], 
+    param_types: List[str], 
+    event_name: Optional[str]=None
 ) -> str: 
 
-    if event_param_type not in EVENT_PARAM_TYPES:
-        raise ValueError(f'event_param_type must be in {EVENT_PARAM_TYPES}.')
+    if len(param_keys) != len(param_types):
+        raise ValueError(f'param_keys and param_types must have the same length.')
+
+    types_ = list(set(param_types))
+
+    for t in types_:
+        if t not in EVENT_PARAM_TYPES:
+            raise ValueError(f'{t} is not a valid event param type. Valid types are {EVENT_PARAM_TYPES}.')
+
+    param_fields = ', '.join([
+        f'COALESCE(ep.value.{t}_value) AS {k}' 
+        for k, t in zip(param_keys, param_types)
+    ])
+
+    conditions = []
+
+    for ix, k in enumerate(param_keys):
+        if ix == 0:
+            conditions.append(f"ep.key = '{k}'")
+        else:
+            conditions.append(f"\nAND ep.key = '{k}'")
+
+    if event_name is not None:
+        conditions += f"\nAND event_name = '{event_name}'"
+
+    conditions = ''.join(conditions)
 
     unnested = f'''
     SELECT 
@@ -19,11 +46,8 @@ def unnest_event_params(
         `{bq_table_path}`, 
         UNNEST(event_params) AS ep
     WHERE
-        ep.key = '{event_param_key}'
+        {conditions}
     '''
-
-    if event_name is not None:
-        unnested += f"AND event_name = '{event_name}'"
 
     return unnested
 
