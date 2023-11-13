@@ -4,50 +4,36 @@ from .enums import EVENT_PARAM_TYPES
 
 def unnest_event_params(
     bq_table_path: str, 
-    param_keys: List[str], 
-    param_types: List[str], 
+    param_keys: Optional[List[str]]=None, 
     event_name: Optional[str]=None
 ) -> str: 
-
-    if len(param_keys) != len(param_types):
-        raise ValueError(f'param_keys and param_types must have the same length.')
-
-    types_ = list(set(param_types))
-
-    for t in types_:
-        if t not in EVENT_PARAM_TYPES:
-            raise ValueError(f'{t} is not a valid event param type. Valid types are {EVENT_PARAM_TYPES}.')
-
-    param_fields = ',\n'.join([
-        f'COALESCE(ep.value.{t}_value) AS {k}' 
-        for k, t in zip(param_keys, param_types)
-    ])
-
-    conditions = []
-
-    for ix, k in enumerate(param_keys):
-        if ix == 0:
-            conditions.append(f"ep.key = '{k}'")
-        else:
-            conditions.append(f"\nAND ep.key = '{k}'")
-
-    if event_name is not None:
-        conditions += f"\nAND event_name = '{event_name}'"
-
-    conditions = ''.join(conditions)
 
     unnested = f'''
     SELECT 
         user_pseudo_id, 
         event_timestamp, 
         event_name, 
-        {param_fields}
+        ep.key AS event_param_key,
+        COALESCE(
+            ep.value.string_value,
+            CAST(ep.value.int_value AS STRING),
+            CAST(ep.value.float_value AS STRING),
+            CAST(ep.value.double_value AS STRING)
+        ) AS event_param_value
     FROM 
         `{bq_table_path}`, 
         UNNEST(event_params) AS ep
-    WHERE
-        {conditions}
     '''
+
+    conditions = ''
+
+    if param_keys is not None:
+        conditions += f'ep.key IN {tuple(param_keys)}'
+    if event_name is not None:
+        conditions += f'\nevent_name = {event_name}'
+
+    if conditions != '':
+        unnested += f'WHERE \n{conditions}'
 
     return unnested
 
@@ -84,6 +70,11 @@ def get_dates(table_path: str, date_field: str) -> str:
     else:
         raise ValueError(f"{date_field} invalid. date_field must either contains 'timestamp' or 'date'.")
 
+    return query
+
+def aggregate_event_param(param_key: str) -> str:
+
+    query = f"MAX(CASE WHEN event_param_key = '{param_key}' THEN event_param_value END) AS {param_key}"
     return query
 
 def select_users(
