@@ -18,7 +18,7 @@ def unnest_event_params(
         if t not in EVENT_PARAM_TYPES:
             raise ValueError(f'{t} is not a valid event param type. Valid types are {EVENT_PARAM_TYPES}.')
 
-    param_fields = ', '.join([
+    param_fields = ',\n'.join([
         f'COALESCE(ep.value.{t}_value) AS {k}' 
         for k, t in zip(param_keys, param_types)
     ])
@@ -41,7 +41,7 @@ def unnest_event_params(
         user_pseudo_id, 
         event_timestamp, 
         event_name, 
-        COALESCE(ep.value.{event_param_type}_value) AS {event_param_key}
+        {param_fields}
     FROM 
         `{bq_table_path}`, 
         UNNEST(event_params) AS ep
