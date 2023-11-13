@@ -5,7 +5,6 @@ from .utils import (
     get_table_ids,
     query_to_pandas
 )
-from .queries import unnest_event_params
 
 __all__ = [
     'PROJECT',
@@ -15,5 +14,5 @@ __all__ = [
     'get_dataset_ids', 
     'get_table_ids', 
     'query_to_pandas',
-    'unnest_event_params', 
+    'queries', 
 ]
