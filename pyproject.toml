@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "bigquery-utils"
+version = "0.1.0"
+description = ""
+authors = ["PeDiot <p.emmanuel.diot@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+google-cloud-bigquery = "^3.13.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

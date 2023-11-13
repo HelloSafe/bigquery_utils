@@ -1,0 +1,13 @@
+# .gitignore
+secrets/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Poetry
+.venv/
+poetry.lock
+dist/
