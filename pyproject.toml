@@ -6,7 +6,7 @@ authors = ["PeDiot <p.emmanuel.diot@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.11,<3.12"
 google-cloud-bigquery = "^3.13.0"
 pandas = "^2.1.3"
 ipython = "^8.17.2"
